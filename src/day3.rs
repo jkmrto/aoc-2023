@@ -12,7 +12,7 @@ struct Number {
     positions: Vec<Pos>,
 }
 
-fn locale_numbers(file_lines: &Vec<&str>) -> Vec<Number> {
+fn locate_numbers(file_lines: &Vec<&str>) -> Vec<Number> {
     let mut numbers: Vec<Number> = Vec::new();
     for (i, line) in file_lines.iter().enumerate() {
         let mut number_positions: Vec<Pos> = Vec::new();
@@ -59,16 +59,8 @@ fn is_number_in_valid_position(number: &Number, valid_positions: &HashSet<Pos>) 
     return false;
 }
 
-#[allow(dead_code)]
-fn main() {
+fn part1(file_lines: &Vec<&str>) {
     let mut valid_positions: HashSet<Pos> = HashSet::new();
-
-    // let filename = "src/day3_example.txt";
-    // let filename = "src/day3_test.txt";
-    let filename = "src/day3_input.txt";
-    let file_content = fs::read_to_string(filename).expect("error");
-    let file_lines: Vec<&str> = file_content.split("\n").filter(|&line| line != "").collect();
-
     let symbols: Vec<char> = vec!['*', '#', '+', '$', '=', '@', '/', '%', '-', '&'];
 
     for (i, line) in file_lines.iter().enumerate() {
@@ -90,7 +82,7 @@ fn main() {
         }
     }
 
-    let numbers = locale_numbers(&file_lines);
+    let numbers = locate_numbers(&file_lines);
 
     let mut sum = 0;
     for number in numbers.iter() {
@@ -99,14 +91,71 @@ fn main() {
         }
     }
 
-    println!("{:?}", sum)
-
-    //    println!("numbers: {:?}", numbers);
-    //    println!("file_lines: {:?}", file_lines);
-    //    println!("valid_positions: {:?}", valid_positions);
+    println!("Part 1 result: {:?}", sum)
 }
 
-fn part2() {
-    // 1 - find where the gears are located
-    // 2 - Iterate over all the gears to find the adjacent numbers
+fn part2(file_lines: &Vec<&str>) {
+    let mut gear_positions: Vec<Pos> = Vec::new();
+    for (i, line) in file_lines.iter().enumerate() {
+        for (j, character) in line.chars().enumerate() {
+            let y = i as i32;
+            let x = j as i32;
+            if character == '*' {
+                gear_positions.push(Pos { y: y, x: x });
+            }
+        }
+    }
+
+    let numbers = locate_numbers(&file_lines);
+    let mut sum = 0;
+
+    for gear in gear_positions.iter() {
+        let mut gear_adjacents: Vec<&Number> = Vec::new();
+        for number in numbers.iter() {
+            if number.positions.contains(&Pos {
+                y: gear.y - 1,
+                x: gear.x - 1,
+            }) || number.positions.contains(&Pos {
+                y: gear.y - 1,
+                x: gear.x,
+            }) || number.positions.contains(&Pos {
+                y: gear.y - 1,
+                x: gear.x + 1,
+            }) || number.positions.contains(&Pos {
+                y: gear.y,
+                x: gear.x - 1,
+            }) || number.positions.contains(&Pos {
+                y: gear.y,
+                x: gear.x + 1,
+            }) || number.positions.contains(&Pos {
+                y: gear.y + 1,
+                x: gear.x - 1,
+            }) || number.positions.contains(&Pos {
+                y: gear.y + 1,
+                x: gear.x,
+            }) || number.positions.contains(&Pos {
+                y: gear.y + 1,
+                x: gear.x + 1,
+            }) {
+                gear_adjacents.push(number);
+            }
+        }
+
+        if gear_adjacents.len() == 2 {
+            sum = sum + gear_adjacents[0].value * gear_adjacents[1].value
+        }
+    }
+
+    println!("Part 2 result: {:?}", sum);
+}
+#[allow(dead_code)]
+fn main() {
+    // let filename = "src/day3_example.txt";
+    // let filename = "src/day3_test.txt";
+    let filename = "src/day3_input.txt";
+    let file_content = fs::read_to_string(filename).expect("error");
+    let file_lines: Vec<&str> = file_content.split("\n").filter(|&line| line != "").collect();
+
+    part1(&file_lines);
+    part2(&file_lines);
 }
