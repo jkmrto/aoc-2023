@@ -26,17 +26,43 @@ fn do_step(label_to_node: &HashMap<String, Node>, instructions: Vec<char>, node:
     }
 }
 
-#[allow(dead_code)]
-fn main() {
-    let filename = "src/day8_input.txt";
-    // let filename = "src/day8_example.txt";
-    // let filename = "src/day8_example_2.txt";
-    let file_content = fs::read_to_string(filename).expect("error");
-    let file_lines: Vec<&str> = file_content.split("\n").filter(|&line| line != "").collect();
+fn do_step_part2(
+    label_to_node: &HashMap<String, Node>,
+    instructions: Vec<char>,
+    node: &Node,
+    steps: i32,
+    mut visited_nodes: Vec<String>,
+) -> i32 {
+    if node.label.chars().nth(2).unwrap() == 'Z' {
+        return steps;
+    }
 
-    let instructions: Vec<char> = file_lines[0].chars().collect();
-    println!("instructions: {:?}", instructions);
+    if visited_nodes.contains(&node.label) {
+        return 0;
+    }
 
+    let instruction = instructions[(steps as usize) % instructions.len()];
+
+    println!("hello");
+    if instruction == 'L' {
+        println!("hello 11");
+        let next_node = label_to_node.get(&node.left).unwrap();
+        println!("next node: {:?}", next_node);
+        visited_nodes.push(node.label.clone());
+        return do_step_part2(label_to_node, instructions, next_node, steps + 1, visited_nodes);
+    } else if instruction == 'R' {
+        println!("hello 12");
+        let next_node = label_to_node.get(&node.right).unwrap();
+        println!("next node: {:?}", next_node);
+        visited_nodes.push(node.label.clone());
+        return do_step_part2(label_to_node, instructions, next_node, steps + 1, visited_nodes);
+    } else {
+        println!("hello 13");
+        panic!("This is not going well")
+    }
+}
+
+fn build_label_to_nodes(file_lines: Vec<&str>) -> HashMap<String, Node> {
     let mut label_to_node: HashMap<String, Node> = HashMap::new();
 
     let chars_to_remove: Vec<char> = vec!['(', ')'];
@@ -59,6 +85,11 @@ fn main() {
         label_to_node.insert(splitted_line[0].to_string(), node);
     }
 
+    return label_to_node;
+}
+
+fn part1(file_lines: Vec<&str>, instructions: Vec<char>) {
+    let label_to_node = build_label_to_nodes(file_lines);
     println!("Label to Node: {:?}", label_to_node);
 
     let steps = 0;
@@ -67,4 +98,36 @@ fn main() {
     let steps = do_step(&label_to_node, instructions, &node, steps);
 
     println!("Steps: {:?}", steps)
+}
+
+#[allow(dead_code)]
+fn main() {
+    // let filename = "src/day8_input.txt";
+    // let filename = "src/day8_example.txt";
+    let filename = "src/day8_example_3.txt";
+    let file_content = fs::read_to_string(filename).expect("error");
+    let file_lines: Vec<&str> = file_content.split("\n").filter(|&line| line != "").collect();
+    let instructions: Vec<char> = file_lines[0].chars().collect();
+    println!("instructions: {:?}", instructions);
+
+    // part1(file_lines, instructions)
+
+    // part3
+    let label_to_node = build_label_to_nodes(file_lines);
+    let nodes_vector: Vec<&Node> = label_to_node.values().clone().collect();
+
+    let start_nodes: Vec<&Node> = nodes_vector
+        .into_iter()
+        .filter(|node| node.label.chars().nth(2) == Some('A'))
+        .collect::<Vec<_>>();
+
+    println!("Starting nodes {:?}", start_nodes);
+
+    let node = start_nodes[0];
+    let steps = 0;
+
+    println!("First node {:?}", node);
+    let visited_nodes: Vec<String> = vec![];
+    let result = do_step_part2(&label_to_node, instructions, node, steps, visited_nodes);
+    println!("Result 2: {:?}", result)
 }
