@@ -3,6 +3,7 @@ use std::fs;
 #[allow(dead_code)]
 fn main() {
     let filename = "src/day9_input.txt";
+    // let filename = "src/day9_example.txt";
     let file_content = fs::read_to_string(filename).expect("error");
     let file_lines: Vec<&str> = file_content.split("\n").filter(|&line| line != "").collect();
     let input: Vec<Vec<i32>> = file_lines
@@ -15,6 +16,7 @@ fn main() {
         })
         .collect();
 
+    // Part 1
     let mut total_sum: i32 = 0;
     for input_line in &input {
         let mut container: Vec<Vec<i32>> = vec![];
@@ -27,10 +29,24 @@ fn main() {
         }
 
         total_sum = total_sum + sum;
-        println!("Container: {:?}, sum: {:?}", container, sum);
     }
 
-    println!("Total sum {:?}", total_sum);
+    println!("Part 1 {:?}", total_sum);
+
+    let mut total_sum: i32 = 0;
+    for input_line in &input {
+        let mut container: Vec<Vec<i32>> = vec![];
+        container.push(input_line.clone());
+        let container = build_deltas(&input_line, container);
+
+        let mut prev_sum = 0;
+        for deltas in container.iter().rev() {
+            prev_sum = deltas[0] - prev_sum;
+        }
+        total_sum = total_sum + prev_sum;
+    }
+
+    println!("Part 2: {:?}", total_sum);
 }
 
 fn build_deltas(input: &Vec<i32>, mut container: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
